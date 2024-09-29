@@ -15,7 +15,13 @@ const pool = new Pool(connectionOptions);
 // Завершити з'єднання з БД при завершенні роботи застосунку
 process.on('beforeExit', () => pool.end());
 
-module.exports = pool;
+const db = {};
+db.pool = pool;
+
+db.User = User;
+User.pool = pool;
+
+module.exports = db;
 
 // ---------------------------------------
 // // promises then/catch
