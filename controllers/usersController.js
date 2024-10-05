@@ -1,4 +1,6 @@
+const createHttpError = require('http-errors');
 const { User } = require('./../models');
+
 module.exports.createUser = async (req, res, next) => {
   const { body } = req;
 
@@ -12,11 +14,66 @@ module.exports.createUser = async (req, res, next) => {
 };
 
 module.exports.getAllUsers = async (req, res, next) => {
-  res.status(501).send('Not Implemented');
+  const { page, results } = req.query;
+
+  const limit = results;
+  const offset = (page - 1) * results;
+
+  try {
+    const foundUsers = await User.getAll(limit, offset);
+
+    res.status(200).send(foundUsers);
+  } catch (err) {
+    next(err);
+  }
 };
 
-module.exports.getUserById = async (req, res, next) => {};
+module.exports.getUserById = async (req, res, next) => {
+  const { userId } = req.params;
 
-module.exports.updateUserById = async (req, res, next) => {};
+  try {
+    const foundUser = await User.getById(userId);
 
-module.exports.deleteUserById = async (req, res, next) => {};
+    if (!foundUser) {
+      // return res.status(404).send('User Not Found');
+      return next(createHttpError(404, 'User Not Found'));
+    }
+
+    res.status(200).send(foundUser);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports.updateUserById = async (req, res, next) => {
+  const {
+    params: { userId },
+    body,
+  } = req;
+
+  try {
+    const updatedUser = await User.updateById(body, userId);
+
+    if (!updatedUser) {
+      return next(createHttpError(404, 'User Not Found'));
+    }
+
+    res.status(200).send(updatedUser);
+  } catch (err) {
+    next(err);
+  }
+};
+
+module.exports.deleteUserById = async (req, res, next) => {
+  const { userId } = req.params;
+
+  try {
+    const foundUser = await User.deleteById(userId);
+    if (!foundUser) {
+      return next(createHttpError(404, 'User Not Found'));
+    }
+    res.status(204).send();
+  } catch (err) {
+    next(err);
+  }
+};
