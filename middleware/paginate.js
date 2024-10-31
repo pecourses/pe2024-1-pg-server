@@ -16,7 +16,7 @@ module.exports.paginateUsers = async (req, res, next) => {
     : DEFAULT_RESULTS;
 
   const limit = results;
-  const offset = (page - 1) * page;
+  const offset = (page - 1) * results;
 
   req.pagination = { limit, offset };
   next();
